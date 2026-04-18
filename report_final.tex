@@ -1,0 +1,381 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{caption}
+
+\usepackage{parskip}
+
+\geometry{top=1in,bottom=1in,left=1.1in,right=1.1in}
+\setstretch{1.2}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  urlcolor=blue,
+  citecolor=black
+}
+
+\titleformat{\section}{\large\bfseries}{\thesection.}{0.6em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{0.6em}{}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Electricity Bill Minimization Using Linear Programming}
+\fancyhead[R]{April 2026}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\newcommand{\datasetlink}{\href{https://github.com/your-username/your-repository/blob/main/electricity_bill_dataset.csv}{electricity\_bill\_dataset.csv on GitHub}}
+\newcommand{\githublink}{\href{https://github.com/your-username/your-repository}{github.com/your-username/your-repository}}
+\newcommand{\rcodefile}{\href{https://github.com/your-username/your-repository/blob/main/code.R}{code.R (view on GitHub)}}
+
+\begin{document}
+\thispagestyle{empty}
+
+\begin{titlepage}
+  \centering
+  \vspace*{0.7cm}
+  \includegraphics[width=0.18\textwidth]{isi_logo.png}\par
+  \vspace{0.5cm}
+  {\Large \textbf{Indian Statistical Institute, Kolkata Centre}\par}
+  \vspace{0.15cm}
+  {\normalsize Bachelor of Statistics and Data Science (BSDS)\par}
+  \vspace{0.8cm}
+  \rule{0.82\textwidth}{0.8pt}\par
+  \vspace{0.5cm}
+  {\LARGE \textbf{Optimization Using Numerical Methods}\par}
+  \vspace{0.25cm}
+  {\Large Electricity Bill Minimization via Linear Programming\par}
+  \vspace{0.5cm}
+  \rule{0.82\textwidth}{0.5pt}\par
+  \vspace{1cm}
+
+  \begin{tabular}{>{\bfseries}p{0.28\textwidth}p{0.45\textwidth}}
+    Submitted by & Ankesh Raj Aniket (BSDCC2502) \\
+                 & Md Danish (BSDCC2510) \\
+                 & Dunga Pardha Saradhi (BSDCC2506) \\
+    \\
+    Course Instructor & Kaushik Jana \\
+  \end{tabular}
+
+  \vfill
+  \begin{minipage}{0.9\textwidth}
+  \centering
+  \textbf{Dataset Link:} \datasetlink \par
+  \vspace{0.2cm}
+  \textbf{GitHub Repository:} \githublink \par
+  \vspace{0.2cm}
+  \textbf{R Code File:} \rcodefile
+  \end{minipage}
+  \vfill
+
+  {\large April 2026\par}
+\end{titlepage}
+
+\section*{Abstract}
+
+This report studies the minimization of an electricity bill using linear programming under a time-varying tariff structure. The main idea is that when some appliances can be shifted from peak hours to off-peak hours, the same energy demand can be satisfied at a lower total cost. Using appliance-level data, the problem is written as a linear optimization model and solved in R with the \texttt{lpSolve} package. The report explains the model, interprets the numerical output, and discusses why the obtained savings are economically meaningful.
+
+The current results show that the annual electricity cost decreases from Rs.\ 23,876,640 to Rs.\ 15,917,760, giving a saving of Rs.\ 7,958,880, which is approximately 33.3\%. This report presents the mathematical formulation, data description, methodology, result interpretation, limitations, and possible improvements in a compact black-and-white academic format.
+
+\section{Introduction}
+
+Electricity is a necessary part of daily life, but its cost depends not only on the total number of units consumed. In many real settings, the tariff changes by time period. Peak hours are costly because demand on the grid is high, while off-peak hours are cheaper because demand is lower. This creates a practical optimization problem. If part of the electricity use can be shifted to cheaper hours, then the bill may be reduced without reducing total energy consumption.
+
+This project studies that problem using a linear programming approach. The purpose is to determine an economical allocation of appliance usage while keeping the required level of electricity service unchanged. The report uses data for six appliances: fan, refrigerator, air conditioner, television, monitor, and motor pump. Some of these are flexible, while others are almost fixed in operation.
+
+The objective of the study is not only to obtain a lower electricity bill, but also to demonstrate how a real-life resource allocation problem may be written mathematically and solved computationally. Because of that, both the numerical method and the economic interpretation are important parts of the discussion.
+
+\section{Problem Description and Data}
+
+The problem can be stated in simple terms. Each appliance has a required amount of energy consumption over the planning period. At the same time, electricity is charged at different rates in peak and off-peak periods. The task is to schedule or allocate consumption so that the total cost is minimized while all energy requirements are met.
+
+The dataset used for the project contains monthly observations and appliance-related variables over 12 months. The R code computes cumulative energy requirements by summing the appliance columns. It also derives a peak tariff and an off-peak tariff from the average tariff in the data. These transformed values are then used in the optimization model.
+
+To keep the report reproducible, the final submission includes the following external references:
+
+\begin{itemize}[leftmargin=*]
+  \item Dataset source: \datasetlink
+  \item GitHub repository: \githublink
+  \item R script file: \rcodefile
+\end{itemize}
+
+The appliance set used in the report is summarized in Table \ref{tab:data}.
+
+\begin{table}[H]
+\centering
+\caption{Representative Appliance Demand and Tariff Structure}
+\label{tab:data}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Appliance} & \textbf{Requirement (kWh)} & \textbf{Peak Rate} & \textbf{Off-Peak Rate} & \textbf{Nature} \\
+\midrule
+Fan & 3 & 6 & 4 & Flexible \\
+Refrigerator & 5 & 6 & 4 & Continuous \\
+Air Conditioner & 4 & 7 & 5 & Partially flexible \\
+Television & 2 & 5 & 3 & Flexible \\
+Monitor & 2 & 5 & 3 & Flexible \\
+Motor Pump & 3 & 6 & 4 & Schedulable \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+This table is illustrative and helps explain how different appliances contribute differently to the total bill. Continuous-load appliances such as refrigerators have low shifting flexibility, while appliances like televisions and fans are easier to schedule in cheaper time windows.
+
+\section{Mathematical Formulation}
+
+Let the set of appliances be indexed by
+\[
+I=\{1,2,\dots,n\}.
+\]
+For each appliance \(i \in I\), define:
+
+\begin{itemize}[leftmargin=*]
+  \item \(R_i\): required energy demand of appliance \(i\),
+  \item \(c_i^{(p)}\): peak tariff of appliance \(i\),
+  \item \(c_i^{(o)}\): off-peak tariff of appliance \(i\),
+  \item \(x_i\): energy allocated to the optimized lower-cost schedule.
+\end{itemize}
+
+The total optimized electricity cost is
+\[
+\min Z=\sum_{i=1}^{n} c_i^{(o)}x_i.
+\]
+
+The demand requirement of each appliance must be satisfied:
+\[
+x_i \geq R_i, \qquad i=1,2,\dots,n.
+\]
+
+The variables are also non-negative:
+\[
+x_i \geq 0, \qquad i=1,2,\dots,n.
+\]
+
+In matrix notation, the model may be written as
+\[
+\min \mathbf{c}^{\top}\mathbf{x}
+\]
+subject to
+\[
+I_n \mathbf{x}\geq \mathbf{R}, \qquad \mathbf{x}\geq \mathbf{0}.
+\]
+
+This is the same structure used in the R code through a diagonal constraint matrix. Because the objective coefficients are positive, the optimum occurs when every \(x_i\) takes its smallest feasible value. Therefore,
+\[
+x_i^{\star}=R_i \quad \text{for all } i,
+\]
+and the optimized objective value becomes
+\[
+Z^{\star}=\sum_{i=1}^{n} c_i^{(o)}R_i.
+\]
+
+The baseline cost before optimization is
+\[
+Z_{\text{before}}=\sum_{i=1}^{n} c_i^{(p)}R_i,
+\]
+while the savings are
+\[
+S=Z_{\text{before}}-Z_{\text{after}}.
+\]
+
+The percentage saving is
+\[
+\text{Saving \%}=\frac{Z_{\text{before}}-Z_{\text{after}}}{Z_{\text{before}}}\times 100.
+\]
+
+An efficiency-type measure used in the project is
+\[
+E=\frac{S}{\sum_{i=1}^{n}R_i},
+\]
+which gives the rupees saved per unit of total demand.
+
+\subsection{Illustrative Calculation}
+
+Suppose a fan consumes \(3\) kWh, the peak tariff is Rs.\ 6 per kWh, and the off-peak tariff is Rs.\ 4 per kWh. Then
+\[
+Z_{\text{before,fan}} = 6 \times 3 = 18,
+\qquad
+Z_{\text{after,fan}} = 4 \times 3 = 12.
+\]
+Hence the saving for that appliance is
+\[
+18-12 = 6 \text{ Rs.}
+\]
+The same linear idea extends to all appliances together.
+
+\section{Methodology}
+
+The methodology followed in the project has four main stages.
+
+\subsection{Data Preparation}
+
+The data are loaded into R and the main columns are converted into numeric form. Appliance columns are then selected, and the total demand for each appliance is computed using column sums. This gives the required energy input for the optimization model.
+
+\subsection{Tariff Construction}
+
+The code derives two effective tariff levels from the average tariff in the dataset:
+\[
+c^{(p)} = 1.2\bar{c}, \qquad c^{(o)} = 0.8\bar{c},
+\]
+where \(\bar{c}\) is the average tariff rate. This creates a simple peak and off-peak pricing framework.
+
+\subsection{Linear Program Solution}
+
+The optimization problem is solved with the \texttt{lp()} function from the \texttt{lpSolve} package. The objective vector consists of the off-peak tariff repeated for all appliances. The constraint matrix is diagonal, meaning each appliance is treated independently with a lower-bound demand constraint.
+
+\subsection{Post-Optimization Analysis}
+
+After solving the model, the R code calculates:
+
+\begin{itemize}[leftmargin=*]
+  \item cost before optimization,
+  \item optimized cost,
+  \item total savings,
+  \item efficiency ratio,
+  \item graphical comparisons.
+\end{itemize}
+
+The full R code is referenced through the clickable link provided on the title page and can be viewed directly at: \rcodefile.
+
+\section{Results and Interpretation}
+
+The key numerical outputs from the present project are shown in Table \ref{tab:results}.
+
+\begin{table}[H]
+\centering
+\caption{Summary of Optimization Results}
+\label{tab:results}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{lc}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Before Optimization Cost & Rs.\ 23,876,640 \\
+After Optimization Cost & Rs.\ 15,917,760 \\
+Total Savings & Rs.\ 7,958,880 \\
+Percentage Savings & 33.3\% \\
+Efficiency Ratio & 3.38 Rs./kWh \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The result indicates that the optimized electricity cost is significantly lower than the baseline cost. The most important point is that the reduction is achieved by scheduling under cheaper tariffs rather than by reducing the total demand itself. This makes the method practical in settings where service quality must be maintained.
+
+The saving percentage is also consistent with the tariff construction. Since the model compares a higher tariff \(1.2\bar{c}\) with a lower tariff \(0.8\bar{c}\), the ratio between optimized and baseline cost becomes
+\[
+\frac{0.8\bar{c}}{1.2\bar{c}}=\frac{2}{3},
+\]
+which means the optimized cost is approximately \(66.7\%\) of the original cost. Therefore the saving is about
+\[
+1-\frac{2}{3}=\frac{1}{3}\approx 33.3\%.
+\]
+This explains why the result is stable and mathematically expected.
+
+\subsection{Appliance Allocation}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\textwidth]{allocation.png}
+\caption{Optimized energy allocation per appliance}
+\label{fig:allocation}
+\end{figure}
+
+Figure \ref{fig:allocation} shows the optimized allocation across appliances. Since the decision variables settle at their required demand levels, the graph reflects the relative energy burden of each appliance in the dataset. Appliances with larger total annual demand naturally receive larger optimized allocations.
+
+\subsection{Cost Comparison}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.68\textwidth]{cost_comparison.png}
+\caption{Cost before and after optimization}
+\label{fig:cost}
+\end{figure}
+
+Figure \ref{fig:cost} provides the clearest visual summary of the project. The lower second bar confirms the numerical saving found in Table \ref{tab:results}. The gap between the two bars is the monetary benefit created by moving demand to the lower-cost tariff structure.
+
+\subsection{Efficiency Ratio}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.62\textwidth]{efficiency_ratio.png}
+\caption{Savings efficiency ratio}
+\label{fig:eff}
+\end{figure}
+
+The efficiency ratio condenses the savings into a single quantity measured in rupees per kWh. This is useful because it gives an intuitive measure of how much economic value is obtained for each unit of demand handled under the optimized structure.
+
+\subsection{Savings Contribution}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.58\textwidth]{savings_pie_.png}
+\caption{Savings contribution in the total electricity bill}
+\label{fig:pie}
+\end{figure}
+
+Figure \ref{fig:pie} separates the optimized bill and the savings share of the original cost. It shows that about one-third of the original bill is saved under the present tariff assumptions.
+
+\subsection{Monthly Trend}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.78\textwidth]{load_curve.png}
+\caption{Monthly electricity cost pattern before and after optimization}
+\label{fig:load}
+\end{figure}
+
+The monthly load curve shows that the optimized series remains below the baseline series throughout the year. This suggests that the savings are not isolated to only one or two months but are spread over the full planning horizon.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\textwidth]{monthly_saving_trend_.png}
+\caption{Monthly savings trend}
+\label{fig:monthlysaving}
+\end{figure}
+
+Figure \ref{fig:monthlysaving} presents the month-wise savings directly. The pattern remains fairly stable throughout the year, which suggests that the benefit of optimization is consistent rather than occasional.
+
+\section{Discussion}
+
+The model succeeds in showing the basic economic benefit of shifting electricity use away from expensive tariff periods. It is mathematically simple, computationally easy to solve, and suitable for a course report in numerical optimization. The structure also makes the interpretation transparent because every coefficient and constraint has a clear practical meaning.
+
+At the same time, the current formulation is simplified. It does not explicitly index usage by hourly time blocks, and it does not impose detailed flexibility limits for each appliance. In the present model, all demand is effectively priced at the lower tariff after optimization. This is mathematically valid for the chosen formulation, but it is also why the result should be interpreted as a stylized optimization outcome rather than a full operational schedule.
+
+For a more realistic version, one could introduce time-indexed variables \(x_{it}\), hourly tariff values \(c_t\), appliance capacity limits, and constraints on how much usage can actually be shifted. Such an extension would create a richer scheduling model and would better represent real smart-grid systems.
+
+\section{Conclusion}
+
+This report demonstrates that linear programming can be applied effectively to the problem of electricity bill minimization. By using appliance-level demand and a peak versus off-peak tariff framework, the project shows that a significant reduction in total cost can be achieved through better allocation of energy usage.
+
+The final result of the current study is a saving of Rs.\ 7,958,880, or about 33.3\%, relative to the baseline cost. The report also shows why this value arises mathematically from the tariff gap used in the model. In addition to presenting the result, the report explains the formulation, the assumptions, and the practical meaning of the optimization.
+
+Overall, the project gives a clear example of how a real-life cost minimization problem can be translated into mathematical notation, solved using R, and interpreted in an applied setting. With future extensions such as time-wise constraints and appliance-specific flexibility rules, the same framework could be developed into a more realistic smart-energy optimization model.
+
+\section{References}
+
+\begin{enumerate}[leftmargin=*]
+  \item Winston, W. L. \textit{Operations Research: Applications and Algorithms}. Thomson Brooks/Cole.
+  \item Berkelaar, M., Eikland, K., and Notebaert, P. \textit{lpSolve: Interface to lp\_solve}. R package documentation.
+  \item Wickham, H. \textit{ggplot2: Elegant Graphics for Data Analysis}. Springer.
+  \item Bazaraa, M. S., Jarvis, J. J., and Sherali, H. D. \textit{Linear Programming and Network Flows}. Wiley.
+  \item Dataset link: \datasetlink
+  \item Repository link: \githublink
+  \item R code link: \rcodefile
+\end{enumerate}
+
+\end{document}
