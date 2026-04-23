@@ -62,9 +62,7 @@ The project clearly demonstrates:
 
 This project serves as an excellent practical example of applying **Operations Research** and **Mathematical Optimization** to solve everyday problems in the energy sector.
 
-**Author**: Ankesh Raj  
+**Author**: Ankesh Raj, Md Danish and Dunga Pardha Saradhi
+
 **Repository**: [anii0021/Electricity-Bill-Minimization-Using-Linear-Optimization](https://github.com/anii0021/Electricity-Bill-Minimization-Using-Linear-Optimization)
 
----
-
-Made with ❤️ to promote smarter energy consumption and sustainable cost savings.
