@@ -71,9 +71,27 @@ pie(c(after_cost, savings),
              paste0("Savings (",round(100*savings/(before_cost),1),"%)")),
     col=c("skyblue","orange"), main="Savings Contribution")
 
-# Graph 4: Efficiency Ratio
-barplot(eff_ratio, names.arg="Efficiency Ratio", col="purple",
-        main="Savings Efficiency", ylab="Rs. per kWh shifted")
+# Efficiency Table 
+efficiency_table <- data.frame(
+  Metric = c(
+    "Total Demand (all appliances)",
+    "Total Savings",
+    "Efficiency Ratio (E = S / total demand)",
+    "Peak Tariff Rate",
+    "Off-Peak Tariff Rate",
+    "Tariff Ratio (peak / off-peak)"
+  ),
+  Value = c(
+    paste0(format(sum(requirement), big.mark=","), " kWh"),
+    paste0("Rs. ", format(round(savings), big.mark=",")),
+    paste0(round(savings / sum(requirement), 2), " Rs. per kWh"),
+    paste0(round(peak_rate, 2), " Rs./kWh"),
+    paste0(round(offpeak_rate, 2), " Rs./kWh"),
+    paste0(round(peak_rate / offpeak_rate, 2), "x")
+  )
+)
+
+print(efficiency_table)
 
 # Graph 5: Monthly Load Curve (numeric y-axis)
 before_curve <- aggregate(as.numeric(data$ElectricityBill),
