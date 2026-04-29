@@ -40,6 +40,7 @@
 
 \newcommand{\datasetlink}{\href{https://www.kaggle.com/datasets/suraj520/indian-household-electricity-bill}}
 \newcommand{\githublink}{\href{https://github.com/rangerbelx/Electricity-Bill-Minimization-Using-Linear-Optimization/}}
+\newcommand{\rcodefile}{\href{https://github.com/rangerbelx/Electricity-Bill-Minimization-Using-Linear-Optimization/blob/main/electricity_optimization.R}{R Script}}
 
 
 \begin{document}
@@ -310,13 +311,24 @@ Figure \ref{fig:cost} provides the clearest visual summary of the project. The l
 
 \subsection{Efficiency Ratio}
 
-\begin{figure}[H]
+\begin{table}[H]
 \centering
-\includegraphics[width=0.62\textwidth]{efficiency_ratio.png}
-\caption{Savings efficiency ratio}
-\label{fig:eff}
-\end{figure}
-
+\caption{Savings efficiency metrics}
+\label{tab:efficiency}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Metric} & \textbf{Value} & \textbf{Unit} \\
+\midrule
+Total Demand (all appliances) & 2,352,000 & kWh \\
+Total Savings & Rs.\ 7,958,880 & Rs. \\
+Efficiency Ratio $(E = S /$ total demand$)$ & 3.38 & Rs.\ per kWh \\
+Peak Tariff Rate & $1.2 \times$ avg tariff & Rs./kWh \\
+Off-Peak Tariff Rate & $0.8 \times$ avg tariff & Rs./kWh \\
+Tariff Ratio (peak / off-peak) & $1.5\times$ & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
 The efficiency ratio condenses the savings into a single quantity measured in rupees per kWh. This is useful because it gives an intuitive measure of how much economic value is obtained for each unit of demand handled under the optimized structure.
 
 \subsection{Savings Contribution}
